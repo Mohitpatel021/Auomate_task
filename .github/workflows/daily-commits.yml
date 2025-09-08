@@ -1,8 +1,8 @@
-name: daily-commits
+name: daily-varied-commits
 
 on:
   schedule:
-    - cron: '30 17 * * *'   # 11:00 PM IST daily (UTC cron)
+    - cron: '30 17 * * *'   # Daily 11:00 PM IST
   workflow_dispatch:
 
 permissions:
@@ -11,26 +11,104 @@ permissions:
 jobs:
   commit-bot:
     runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Kolkata
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Git identity
+      - name: Setup git identity
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Make 4-5 small commits
+      - name: Ensure folders exist
         run: |
-          set -e
-          COMMITS=$(( (RANDOM % 2) + 4 ))  # 4 ya 5 commits
-          for i in $(seq 1 $COMMITS); do
-            echo "tick $(date -u '+%Y-%m-%d %H:%M:%S') $RANDOM" >> activity.log
-            git add activity.log
-            git commit -m "chore(bot): daily tick #$i"
-            # thoda gap (5–15 sec) — optional
-            sleep $(( (RANDOM % 11) + 5 ))
-          done
+          mkdir -p daily logs data config src/utils tests/daily docs
+
+      # Commit #1: new daily markdown
+      - name: Commit 1 - daily note
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          FILE="daily/${DATE}.md"
+          echo "# Daily Note - ${DATE}" > "$FILE"
+          echo "- Created at: $(date)" >> "$FILE"
+          git add "$FILE"
+          git commit -m "docs(daily): add note for ${DATE}"
+
+      # Commit #2: CSV activity log
+      - name: Commit 2 - CSV log
+        run: |
+          echo "timestamp,rand" | { [ -s logs/activity.csv ] || cat; } > /tmp/h
+          [ -s logs/activity.csv ] && tail -n +2 logs/activity.csv >> /tmp/h || true
+          mv /tmp/h logs/activity.csv
+          echo "$(date +'%F %T'),$RANDOM" >> logs/activity.csv
+          git add logs/activity.csv
+          git commit -m "chore(log): append activity row"
+
+      # Commit #3: JSON stats bump
+      - name: Commit 3 - JSON stats
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          FILE="data/stats.json"
+          if [ ! -f "$FILE" ]; then echo '{"days":{}}' > "$FILE"; fi
+          node -e '
+            const fs=require("fs");
+            const f="data/stats.json";
+            const o=JSON.parse(fs.readFileSync(f,"utf8"));
+            const d=process.env.DATE;
+            o.days[d]={ updatedAt:new Date().toISOString(), value: Math.floor(Math.random()*1000) };
+            fs.writeFileSync(f, JSON.stringify(o,null,2));
+          '
+          git add "$FILE"
+          git commit -m "feat(stats): update ${DATE} entry"
+
+      # Commit #4: README tip rotation
+      - name: Commit 4 - README tip
+        run: |
+          TIPS=("Keep commits small." "Use meaningful messages." "Automate tasks." "Review before push." "Document in code.")
+          TIP=${TIPS[$RANDOM % ${#TIPS[@]}]}
+          [ -f README.md ] || echo "# Project" > README.md
+          grep -q "<!-- AUTO:START -->" README.md || echo -e "\n<!-- AUTO:START -->\n<!-- AUTO:END -->" >> README.md
+          awk -v tip="$TIP" '
+            /<!-- AUTO:START -->/ { print; print "> Daily Tip: " tip; skip=1; next }
+            /<!-- AUTO:END -->/ { skip=0 }
+            skip!=1 { print }
+          ' README.md > /tmp/r && mv /tmp/r README.md
+          git add README.md
+          git commit -m "docs(readme): rotate daily tip"
+
+      # Commit #5: Changelog entry
+      - name: Commit 5 - changelog
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          echo "## [${DATE}]\n- Daily maintenance entry\n" >> CHANGELOG.md
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): add ${DATE} entry"
+
+      # Commit #6: Config tweak
+      - name: Commit 6 - config tweak
+        run: |
+          echo "heartbeat: $(date +'%F %T %Z')" > config/settings.yml
+          echo "featureToggle: $((RANDOM % 2))" >> config/settings.yml
+          git add config/settings.yml
+          git commit -m "chore(config): refresh heartbeat + toggle"
+
+      # Commit #7: TODO injection in utils
+      - name: Commit 7 - utils TODO
+        run: |
+          echo "// TODO: check function health on $(date +'%F %T')" >> src/utils/helpers.js
+          git add src/utils/helpers.js
+          git commit -m "refactor(utils): add daily TODO"
+
+      # Commit #8: Daily test case
+      - name: Commit 8 - test case
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          FILE="tests/daily/test-${DATE}.spec.js"
+          echo "test('sanity check ${DATE}', () => { expect(2+2).toBe(4); });" > "$FILE"
+          git add "$FILE"
+          git commit -m "test: add daily sanity test ${DATE}"
 
       - name: Push changes
         run: git push
