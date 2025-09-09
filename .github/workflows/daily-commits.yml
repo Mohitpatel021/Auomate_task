@@ -16,11 +16,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup git identity
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync with remote
+        run: |
+          git fetch origin
+          git pull --rebase origin main || true
 
       - name: Ensure folders exist
         run: |
@@ -101,14 +108,15 @@ jobs:
           git add src/utils/helpers.js
           git commit -m "refactor(utils): add daily TODO"
 
-      # Commit #8: Daily test case
+      # Commit #8: Daily test case (never fails; allows empty)
       - name: Commit 8 - test case
         run: |
           DATE=$(date +'%Y-%m-%d')
           FILE="tests/daily/test-${DATE}.spec.js"
           echo "test('sanity check ${DATE}', () => { expect(2+2).toBe(4); });" > "$FILE"
-          git add "$FILE"
-          git commit -m "test: add daily sanity test ${DATE}"
+          git add "$FILE" || true
+          git commit --allow-empty -m "test: add daily sanity test ${DATE}"
 
       - name: Push changes
-        run: git push
+        run: |
+          git push origin HEAD:main
