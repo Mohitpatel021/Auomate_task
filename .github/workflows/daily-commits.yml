@@ -41,7 +41,9 @@ jobs:
           echo "# Daily Note - ${DATE}" > "$FILE"
           echo "- Created at: $(date)" >> "$FILE"
           git add "$FILE"
-          git commit -m "docs(daily): add note for ${DATE}"
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(daily): add note for ${DATE}"
+          fi
 
       # Commit #2: CSV activity log
       - name: Commit 2 - CSV log
@@ -51,7 +53,9 @@ jobs:
           mv /tmp/h logs/activity.csv
           echo "$(date +'%F %T'),$RANDOM" >> logs/activity.csv
           git add logs/activity.csv
-          git commit -m "chore(log): append activity row"
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(log): append activity row"
+          fi
 
       # Commit #3: JSON stats bump
       - name: Commit 3 - JSON stats
@@ -68,7 +72,9 @@ jobs:
             fs.writeFileSync(f, JSON.stringify(o,null,2));
           '
           git add "$FILE"
-          git commit -m "feat(stats): update ${DATE} entry"
+          if ! git diff --cached --quiet; then
+            git commit -m "feat(stats): update ${DATE} entry"
+          fi
 
       # Commit #4: README tip rotation
       - name: Commit 4 - README tip
@@ -83,7 +89,9 @@ jobs:
             skip!=1 { print }
           ' README.md > /tmp/r && mv /tmp/r README.md
           git add README.md
-          git commit -m "docs(readme): rotate daily tip"
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(readme): rotate daily tip"
+          fi
 
       # Commit #5: Changelog entry
       - name: Commit 5 - changelog
@@ -91,7 +99,9 @@ jobs:
           DATE=$(date +'%Y-%m-%d')
           echo "## [${DATE}]\n- Daily maintenance entry\n" >> CHANGELOG.md
           git add CHANGELOG.md
-          git commit -m "docs(changelog): add ${DATE} entry"
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(changelog): add ${DATE} entry"
+          fi
 
       # Commit #6: Config tweak
       - name: Commit 6 - config tweak
@@ -99,14 +109,18 @@ jobs:
           echo "heartbeat: $(date +'%F %T %Z')" > config/settings.yml
           echo "featureToggle: $((RANDOM % 2))" >> config/settings.yml
           git add config/settings.yml
-          git commit -m "chore(config): refresh heartbeat + toggle"
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(config): refresh heartbeat + toggle"
+          fi
 
       # Commit #7: TODO injection in utils
       - name: Commit 7 - utils TODO
         run: |
           echo "// TODO: check function health on $(date +'%F %T')" >> src/utils/helpers.js
           git add src/utils/helpers.js
-          git commit -m "refactor(utils): add daily TODO"
+          if ! git diff --cached --quiet; then
+            git commit -m "refactor(utils): add daily TODO"
+          fi
 
       # Commit #8: Daily test case (never fails; allows empty)
       - name: Commit 8 - test case
