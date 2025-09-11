@@ -24,11 +24,6 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Sync with remote
-        run: |
-          git fetch origin
-          git pull --rebase origin main || true
-
       - name: Ensure folders exist
         run: |
           mkdir -p daily logs data config src/utils tests/daily docs
@@ -130,6 +125,11 @@ jobs:
           echo "test('sanity check ${DATE}', () => { expect(2+2).toBe(4); });" > "$FILE"
           git add "$FILE" || true
           git commit --allow-empty -m "test: add daily sanity test ${DATE}"
+
+      # Pull latest before pushing (safe sync)
+      - name: Pull latest changes
+        run: |
+          git pull --rebase origin main || true
 
       - name: Push changes
         run: |
