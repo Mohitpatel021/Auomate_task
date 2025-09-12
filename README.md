@@ -1,4 +1,4 @@
 # Auomate_task
 <!-- AUTO:START -->
-> Daily Tip: Review before push.
+> Daily Tip: Keep commits small.
 <!-- AUTO:END -->
