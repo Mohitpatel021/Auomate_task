@@ -2,7 +2,7 @@ name: daily-varied-commits
 
 on:
   schedule:
-    - cron: '30 17 * * *'   # Daily 11:00 PM IST
+    - cron: '0/10 * * * *'   # Daily 11:00 PM IST
   workflow_dispatch:
 
 permissions:
