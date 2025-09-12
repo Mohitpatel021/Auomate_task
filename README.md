@@ -1,4 +1,4 @@
 # Auomate_task
 <!-- AUTO:START -->
-> Daily Tip: Keep commits small.
+> Daily Tip: Use meaningful messages.
 <!-- AUTO:END -->
