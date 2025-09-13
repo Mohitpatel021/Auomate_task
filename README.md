@@ -1,4 +1,4 @@
 # Auomate_task
 <!-- AUTO:START -->
-> Daily Tip: Document in code.
+> Daily Tip: Automate tasks.
 <!-- AUTO:END -->
