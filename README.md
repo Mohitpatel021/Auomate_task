@@ -1,4 +1,4 @@
 # Auomate_task
 <!-- AUTO:START -->
-> Daily Tip: Review before push.
+> Daily Tip: Use meaningful messages.
 <!-- AUTO:END -->
