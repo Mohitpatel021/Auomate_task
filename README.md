@@ -1,4 +1,4 @@
 # Auomate_task
 <!-- AUTO:START -->
-> Daily Tip: Keep commits small.
+> Daily Tip: Automate tasks.
 <!-- AUTO:END -->
