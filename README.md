@@ -1,4 +1,4 @@
 # Auomate_task
 <!-- AUTO:START -->
-> Daily Tip: Automate tasks.
+> Daily Tip: Use meaningful messages.
 <!-- AUTO:END -->
